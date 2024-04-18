@@ -5,20 +5,16 @@ const ClaimsPage = () => {
   const [claims, setClaims] = useState([]);
   const [filter, setFilter] = useState("All");
 
-  // Simulated initial data loading
+  // Fetch claims from the server
   useEffect(() => {
-    // Fetch claims from the server or database
-    // Replace this with your actual data fetching logic
     const fetchClaims = async () => {
       try {
-        // Simulated data
-        const data = [
-          { claim_id: 1, description: "Expense for office supplies", status: "approved", amount: 100.0, created_by: 1, approved_by: 2 },
-          { claim_id: 2, description: "Travel expense for client meeting", status: "pending", amount: 250.0, created_by: 2, approved_by: null },
-          { claim_id: 3, description: "Dinner with client", status: "rejected", amount: 80.0, created_by: 3, approved_by: 2 }
-          // Add more claims as needed
-        ];
-        setClaims(data);
+        const response = await fetch("http://localhost:3007/claims");
+        if (!response.ok) {
+          throw new Error("Failed to fetch claims");
+        }
+        const data = await response.json();
+        setClaims(data.claims);
       } catch (error) {
         console.error("Error fetching claims:", error);
       }
@@ -34,7 +30,6 @@ const ClaimsPage = () => {
   const filteredClaims = filter === "All" ? claims : claims.filter(claim => claim.status === filter);
 
   const handleSubmitNewClaim = () => {
-    // Implement logic to navigate to the page for submitting new claims
     console.log("Navigate to submit new claim page");
   };
 

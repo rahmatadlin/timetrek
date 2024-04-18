@@ -3,21 +3,22 @@ import "../App.css";
 
 const OTPage = () => {
   const [overtimeRecords, setOvertimeRecords] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [newOTData, setNewOTData] = useState({
+    date: "",
+    ot_duration: "",
+    status: "pending"
+  });
 
-  // Simulated initial data loading
   useEffect(() => {
-    // Fetch overtime records from the server or database
-    // Replace this with your actual data fetching logic
     const fetchOvertimeRecords = async () => {
       try {
-        // Simulated data
-        const data = [
-          { ot_id: 1, date: "2024-03-01", ot_duration: 2.5, status: "approved" },
-          { ot_id: 2, date: "2024-03-10", ot_duration: 3.0, status: "pending" },
-          { ot_id: 3, date: "2024-03-15", ot_duration: 1.5, status: "rejected" },
-          // Add more overtime records as needed
-        ];
-        setOvertimeRecords(data);
+        const response = await fetch("http://localhost:3007/overtime");
+        if (!response.ok) {
+          throw new Error("Failed to fetch overtime records");
+        }
+        const data = await response.json();
+        setOvertimeRecords(data.overtimeRecords);
       } catch (error) {
         console.error("Error fetching overtime records:", error);
       }
@@ -26,15 +27,42 @@ const OTPage = () => {
     fetchOvertimeRecords();
   }, []);
 
-  const handleNewOTSubmit = () => {
-    // Implement logic to navigate to the page for submitting new OT
-    console.log("Navigate to submit new OT page");
+  const handleNewOTSubmit = async (e) => {
+    e.preventDefault(); 
+
+    try {
+      const response = await fetch("http://localhost:3007/overtime", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newOTData),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to submit new OT");
+      }
+      const data = await response.json();
+      setOvertimeRecords([...overtimeRecords, data.overtimeRecord]);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error submitting new OT:", error);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewOTData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
   };
 
   return (
     <div className="container">
       <h2 className="page-header">Overtime Records</h2>
-      <button className="page-button" onClick={handleNewOTSubmit}>Submit New OT</button>
+      <form onSubmit={handleNewOTSubmit}>
+        <button type="submit" className="page-button" onClick={() => setShowModal(true)}>Submit New OT</button>
+      </form>
       <table className="page-table">
         <thead>
           <tr>
@@ -48,13 +76,28 @@ const OTPage = () => {
           {overtimeRecords.map(ot => (
             <tr key={ot.ot_id}>
               <td>{ot.ot_id}</td>
-              <td>{ot.date}</td>
-              <td>{ot.ot_duration}</td>
+              <td>{new Date(ot.date).toISOString().slice(0, 10)}</td>
+              <td>{parseFloat(ot.ot_duration).toFixed(1)}</td> 
               <td>{ot.status}</td>
             </tr>
           ))}
         </tbody>
       </table>
+      
+      {/* Modal */}
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setShowModal(false)}>&times;</span>
+            <h2>Submit New Overtime</h2>
+            <label>Date:</label>
+            <input type="date" name="date" value={newOTData.date} onChange={handleChange} />
+            <label>OT Duration (hours):</label>
+            <input type="number" name="ot_duration" value={newOTData.ot_duration} onChange={handleChange} />
+            <button onClick={handleNewOTSubmit}>Submit</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,20 +4,18 @@ import "../App.css";
 const AttendancePage = () => {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
 
-  // Simulated initial data loading
+  // Fetch attendance records from the server
   useEffect(() => {
-    // Fetch attendance records from the server or database
-    // Replace this with your actual data fetching logic
     const fetchAttendanceRecords = async () => {
       try {
-        // Simulated data
-        const data = [
-          { attendance_id: 1, date: "2024-03-01", clocked_in: "09:00", clocked_out: "18:00" },
-          { attendance_id: 2, date: "2024-03-02", clocked_in: "09:15", clocked_out: "17:45" },
-          { attendance_id: 3, date: "2024-03-03", clocked_in: "09:30", clocked_out: "18:30" },
-          // Add more attendance records as needed
-        ];
-        setAttendanceRecords(data);
+        const response = await fetch("http://localhost:3007/attendance", {
+          mode: "cors",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch attendance records");
+        }
+        const data = await response.json();
+        setAttendanceRecords(data.attendanceRecords);
       } catch (error) {
         console.error("Error fetching attendance records:", error);
       }
@@ -42,7 +40,7 @@ const AttendancePage = () => {
           {attendanceRecords.map(record => (
             <tr key={record.attendance_id}>
               <td>{record.attendance_id}</td>
-              <td>{record.date}</td>
+              <td>{new Date(record.date).toISOString().slice(0, 10)}</td>
               <td>{record.clocked_in}</td>
               <td>{record.clocked_out}</td>
             </tr>

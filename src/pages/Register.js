@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../App.css"; // Import CSS untuk menerapkan styling
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -22,9 +23,9 @@ const Register = () => {
   };
 
   return (
-    <div>
+    <div className="register-container"> 
       <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="register-form"> 
         <div>
           <label>Name:</label>
           <input
@@ -55,7 +56,7 @@ const Register = () => {
             required
           />
         </div>
-        <button type="submit">Register</button>
+        <button type="submit" className="register-button">Register</button> 
       </form>
     </div>
   );
