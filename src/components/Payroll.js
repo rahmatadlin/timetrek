@@ -6,30 +6,33 @@ const ViewPayroll = () => {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [payslips, setPayslips] = useState([]);
 
-  // Mock data
   useEffect(() => {
-    // Fetch payslips from the server or database based on selected year and month
-    // Replace this with your actual data fetching logic
-    const fetchData = async () => {
-      // Mock data for demonstration
-      const mockPayslips = [
-        { id: 1, user_id: 1, month: "January", year: 2024, amount: 1500 },
-        { id: 2, user_id: 1, month: "February", year: 2024, amount: 1600 },
-        { id: 3, user_id: 1, month: "March", year: 2024, amount: 1700 },
-        // Add more payslips as needed
-      ];
-      setPayslips(mockPayslips);
+    const fetchPayslips = async () => {
+      try {
+        const response = await fetch("http://localhost:3007/payslips");
+        if (!response.ok) {
+          throw new Error("Failed to fetch payslips");
+        }
+        const data = await response.json();
+        if (data && data.payslips) {
+          setPayslips(data.payslips);
+        } else {
+          console.error("Invalid payslips data format:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching payslips:", error);
+      }
     };
 
-    fetchData();
+    fetchPayslips();
   }, [year, month]);
 
   const handleYearChange = (e) => {
-    setYear(parseInt(e.target.value));
+    setYear(parseInt(e.target.value)); // Update year when combobox value changes
   };
 
   const handleMonthChange = (e) => {
-    setMonth(parseInt(e.target.value));
+    setMonth(parseInt(e.target.value)); // Update month when combobox value changes
   };
 
   const handleDownloadClick = (payslip) => {
@@ -44,7 +47,9 @@ const ViewPayroll = () => {
         <label>Year:</label>
         <select value={year} onChange={handleYearChange}>
           {[...Array(3).keys()].map((index) => (
-            <option key={year - 1 + index} value={year - 1 + index}>{year - 1 + index}</option>
+            <option key={year - 1 + index} value={year - 1 + index}>
+              {year - 1 + index}
+            </option>
           ))}
         </select>
       </div>
@@ -52,7 +57,11 @@ const ViewPayroll = () => {
         <label>Month:</label>
         <select value={month} onChange={handleMonthChange}>
           {Array.from({ length: 12 }, (_, i) => (
-            <option key={i + 1} value={i + 1}>{new Date(year, i, 1).toLocaleDateString("en-US", { month: "long" })}</option>
+            <option key={i + 1} value={i + 1}>
+              {new Date(year, i, 1).toLocaleDateString("en-US", {
+                month: "long",
+              })}
+            </option>
           ))}
         </select>
       </div>
@@ -72,7 +81,12 @@ const ViewPayroll = () => {
               <td>{payslip.year}</td>
               <td>${payslip.amount}</td>
               <td>
-                <button className="page-button" onClick={() => handleDownloadClick(payslip)}>Download Payslip</button>
+                <button
+                  className="page-button"
+                  onClick={() => handleDownloadClick(payslip)}
+                >
+                  Download Payslip
+                </button>
               </td>
             </tr>
           ))}

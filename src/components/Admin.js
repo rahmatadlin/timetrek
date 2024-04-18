@@ -1,5 +1,5 @@
 // AdminPage.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../App.css"; // Import CSS file
 
 const AdminPage = () => {
@@ -8,6 +8,24 @@ const AdminPage = () => {
     email: "",
     role: "user" // Default role
   });
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("http://localhost:3007/users");
+        if (!response.ok) {
+          throw new Error("Failed to fetch users");
+        }
+        const data = await response.json();
+        setUsers(data.users);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,9 +84,11 @@ const AdminPage = () => {
       <div>
         <h3>Modify Existing User</h3>
         <ul className="modify-user-list">
-          <li>User 1 <button onClick={() => handleModify(1)} className="page-button">Modify</button></li>
-          <li>User 2 <button onClick={() => handleModify(2)} className="page-button">Modify</button></li>
-          {/* Add more users and modify buttons as needed */}
+          {users.map((user) => (
+            <li key={user.id}>
+              {user.username} <button onClick={() => handleModify(user.id)} className="page-button">Modify</button>
+            </li>
+          ))}
         </ul>
       </div>
     </div>

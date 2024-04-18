@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3007;
 var connection = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "Wow@321",
   database: "timetrek",
 });
 
@@ -309,13 +309,21 @@ app.post("/claims", (req, res) => {
 
 // Read all claims
 app.get("/claims", (req, res) => {
-  connection.query(`SELECT * FROM claims`, (err, results) => {
+  connection.query(`
+    SELECT claims.*, 
+           creator.username AS created_by_username, 
+           approver.username AS approved_by_username
+    FROM claims
+    INNER JOIN users AS creator ON claims.created_by = creator.id
+    LEFT JOIN users AS approver ON claims.approved_by = approver.id
+  `, (err, results) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
     res.json({ claims: results });
   });
 });
+
 
 // Read a specific claim by ID
 app.get("/claims/:claimId", (req, res) => {
@@ -508,6 +516,17 @@ app.get("/leaves/:leaveId", (req, res) => {
   );
 });
 
+
+// Read all users
+app.get("/users", (req, res) => {
+  connection.query(`SELECT * FROM users`, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ users: results });
+  });
+});
+
 app.put("/users/:userId", (req, res) => {
   const userId = req.params.userId;
   const { username, password } = req.body;
@@ -540,6 +559,18 @@ app.put("/employment/:userId", (req, res) => {
     }
   );
 });
+
+
+// Read all payslips
+app.get("/payslips", (req, res) => {
+  connection.query(`SELECT * FROM payslip`, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ payslips: results });
+  });
+});
+
 
 // Update payslip
 app.put("/payslip/:payslipId", (req, res) => {

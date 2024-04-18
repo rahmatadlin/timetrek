@@ -64,8 +64,8 @@ const ClaimsPage = () => {
               <td>{claim.description}</td>
               <td>{claim.status}</td>
               <td>${claim.amount}</td>
-              <td>{claim.created_by}</td>
-              <td>{claim.approved_by || "-"}</td>
+              <td>{claim.created_by_username}</td>
+              <td>{claim.approved_by_username || "-"}</td>
             </tr>
           ))}
         </tbody>
